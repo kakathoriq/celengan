@@ -1,184 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Celengan Rosa</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Celengan Rosa</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <div class="logo">Celengan Rosa</div>
-        <div class="menu-icon">&#x2261;</div>
-    </header>
-    <main id="mainContent">
-        <div class="card" data-card-id="danaDarurat">
-            <div class="card-header">Dana Darurat</div>
-            <div class="placeholder-image">
-                <input type="file" accept="image/*" style="display: none;">
-                <img class="uploaded-image-display" src="" alt="Uploaded Image" style="display: none;">
-                <span class="plusIconStyle" style="cursor: pointer;">+</span>
-                <span class="edit-icon" style="display: none; cursor: pointer;">&#9998;</span>
-            </div>
-            <div class="card-content">
-                <div class="target-amount">
-                    <span>Rp. 20.000.000</span> <span class="edit-icon-text" style="cursor: pointer;">&#9998;</span>
-                </div>
-                <div class="weekly-saving">
-                    Rp. 100.000/Minggu
-                    <button class="add-button">+</button>
-                </div>
-            </div>
-            <div class="estimation">
-                Estimation: 200 Minggu
-            </div>
-            <div class="progress-container-with-percentage">
-                <div class="progress-bar-container">
-                    <div class="progress-bar" style="width: 0%;"></div>
-                </div>
-                <span class="progress-percentage-text">0%</span>
-            </div>
-        </div>
+  <header>
+    <div class="logo">Celengan Rosa</div>
+    <div class="menu-icon">&#9776;</div>
+  </header>
 
-        <div class="card add-new-card" id="addNewCardButton">
-            <div class="add-card-icon">+</div>
-            <div class="add-card-text">Tambah Tabungan Baru</div>
-        </div>
-    </main>
-    <script src="script.js"></script>
+  <main id="mainContent">
+    <!-- Kartu default bisa dihapus jika semua dari Supabase -->
+    <div class="card add-new-card" id="addNewCardButton">
+      <div class="add-card-icon">+</div>
+      <div class="add-card-text">Tambah Tabungan Baru</div>
+    </div>
+  </main>
 
-    <script type="module">
-        // --- KONFIGURASI SUPABASE ---
-        // Ganti dengan URL dan Anon Key Supabase Anda
-        const SUPABASE_URL = 'https://ovfsldqbdjhxuxcrpugu.supabase.co'; // Contoh: https://abcdefghijklmn.supabase.co
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92ZnNsZHFiZGpoeHV4Y3JwdWd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4OTY0ODMsImV4cCI6MjA2NjQ3MjQ4M30.VE0k4IMLahiImnd7KJmNu7a7bjKhneWsf6FFJvuCuOM'; // Contoh: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-        const SUPABASE_TABLE_NAME = 'savings'; // Ganti dengan nama tabel Anda di Supabase
-
-        // Impor createClient dari CDN Supabase
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-        // Inisialisasi Supabase Client
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        async function fetchSavings() {
-            try {
-                // Mengambil data dari tabel Supabase
-                const { data, error } = await supabase
-                    .from(SUPABASE_TABLE_NAME)
-                    .select('*'); // Ambil semua kolom
-
-                if (error) {
-                    console.error('Gagal fetch data dari Supabase:', error.message);
-                    return; // Hentikan eksekusi jika ada error
-                }
-
-                console.log('Data dari Supabase:', data);
-                renderSavings(data);
-            } catch (err) {
-                console.error('Error saat fetch data Supabase:', err.message);
-            }
-        }
-
-        function renderSavings(savings) {
-            const main = document.getElementById('mainContent');
-            // Hapus semua kartu yang ada kecuali tombol "Tambah Tabungan Baru"
-            // Ini untuk mencegah duplikasi jika fetchSavings dipanggil berkali-kali
-            const existingCards = main.querySelectorAll('.card:not(#addNewCardButton)');
-            existingCards.forEach(card => card.remove());
-
-            savings.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                // Tambahkan data-card-id jika ada ID di Supabase (misal, item.id)
-                if (item.id) {
-                    card.setAttribute('data-card-id', item.id);
-                }
-
-                // Hitung estimasi dan persentase progress
-                const estimationValue = Math.ceil(item.targetAmount / item.savingRate);
-                const progressPercentage = Math.floor((item.currentAmount / item.targetAmount) * 100);
-
-                card.innerHTML = `
-                    <div class="card-header">${item.title}</div>
-                    <div class="placeholder-image">
-                        <input type="file" accept="image/*" style="display: none;">
-                        <img class="uploaded-image-display" src="${item.imageUrl || ''}" alt="Uploaded Image" style="${item.imageUrl ? 'display: block;' : 'display: none;'}">
-                        <span class="plusIconStyle" style="cursor: pointer; ${item.imageUrl ? 'display: none;' : ''}">+</span>
-                        <span class="edit-icon" style="${item.imageUrl ? 'display: inline-block;' : 'display: none;'} cursor: pointer;">&#9998;</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="target-amount">
-                            <span>Rp. ${item.targetAmount ? item.targetAmount.toLocaleString('id-ID') : '0'}</span>
-                            <span class="edit-icon-text" style="cursor: pointer;">&#9998;</span>
-                        </div>
-                        <div class="weekly-saving">
-                            Rp. ${item.savingRate ? item.savingRate.toLocaleString('id-ID') : '0'}/${item.savingPeriod}
-                            <button class="add-button" data-card-id="${item.id}">+</button> </div>
-                    </div>
-                    <div class="estimation">
-                        Estimation: ${estimationValue} ${item.savingPeriod}
-                    </div>
-                    <div class="progress-container-with-percentage">
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: ${progressPercentage}%;"></div>
-                        </div>
-                        <span class="progress-percentage-text">${progressPercentage}%</span>
-                    </div>
-                `;
-                main.insertBefore(card, document.getElementById('addNewCardButton'));
-            });
-
-            // Tambahkan event listener untuk tombol '+'
-            document.querySelectorAll('.add-button').forEach(button => {
-                button.removeEventListener('click', handleAddSaving); // Hapus listener lama jika ada
-                button.addEventListener('click', handleAddSaving);
-            });
-        }
-
-        async function handleAddSaving(event) {
-            const cardId = event.target.dataset.cardId;
-            if (!cardId) {
-                console.error('Card ID tidak ditemukan untuk tombol ini.');
-                return;
-            }
-
-            // Dapatkan item savings yang sesuai dari Supabase (atau dari array yang sudah di-fetch)
-            // Untuk contoh ini, kita akan asumsikan setiap klik menambahkan `savingRate` ke `currentAmount`
-            // Di aplikasi nyata, Anda mungkin ingin mengambil `currentAmount` dari database, menambahkannya, lalu mengupdate.
-
-            // Ambil data terbaru dari Supabase sebelum mengupdate
-            const { data: currentSaving, error: fetchError } = await supabase
-                .from(SUPABASE_TABLE_NAME)
-                .select('currentAmount, savingRate')
-                .eq('id', cardId)
-                .single(); // Ambil satu baris saja
-
-            if (fetchError || !currentSaving) {
-                console.error('Gagal mengambil data tabungan saat update:', fetchError?.message || 'Data tidak ditemukan.');
-                return;
-            }
-
-            const newAmount = currentSaving.currentAmount + currentSaving.savingRate;
-
-            const { data, error } = await supabase
-                .from(SUPABASE_TABLE_NAME)
-                .update({ currentAmount: newAmount })
-                .eq('id', cardId); // Update berdasarkan ID
-
-            if (error) {
-                console.error('Error saat menambahkan tabungan:', error.message);
-            } else {
-                console.log('Tabungan berhasil ditambahkan:', data);
-                fetchSavings(); // Muat ulang data setelah menambahkan
-            }
-        }
-
-        // Panggil fetchSavings saat DOM selesai dimuat
-        document.addEventListener('DOMContentLoaded', fetchSavings);
-
-        // --- Event Listener untuk "Tambah Tabungan Baru" (tetap pakai JavaScript yang sudah ada di script.js) ---
-        // Jika ada logic untuk menambahkan card baru yang memunculkan modal, itu bisa tetap di script.js
-        // dan nanti data yang diinput bisa dikirim ke Supabase menggunakan supabase.from().insert()
-    </script>
+  <!-- JS menggunakan module -->
+  <script type="module" src="script.js"></script>
 </body>
 </html>
